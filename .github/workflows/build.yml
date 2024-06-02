@@ -1,33 +1,26 @@
 name: Docs Compile CI/CD
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches: [ "main" ]
-    
+on: [push, pull_request]
 jobs:
   build_and_deploy_job:
+    name: Build and Deploy Job
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [20]
-    name: Build and Deploy Job
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
       - name: Install dependencies
         run: npm ci
       - name: Build
-        id: build
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm run build --if-present
-      - name: Post-Build
+        run: npm run build --if-present
+      - name: Store
         uses: actions/upload-artifact@v4
         with:
           name: avalonia-docs
-          path: "/build"
+          path: "build/"
+
